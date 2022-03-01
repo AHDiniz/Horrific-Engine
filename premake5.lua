@@ -5,7 +5,7 @@ project "HorrificEngine"
     kind "ConsoleApp"
     language "C++"
     targetdir "bin/%{cfg.buildcfg}"
-    includedirs { "include" }
+    includedirs { "include/", "vendor/glad/include/glad/", "vendor/glad/include/KHR/" }
     pchheader "include/pch.h"
 
     files { "**.h", "**.c", "**.cpp" }
