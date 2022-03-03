@@ -1,45 +1,24 @@
 #include "pch.h"
 #include "glad.h"
 #include "glfw3.h"
-#include "memory/memory.h"
-
-#define MEM_CACHE_SIZE 2048
-
-void FrameBufferSizeCallback(GLFWwindow *window, int width, int height);
+#include "core/memory.h"
+#include "core/app.h"
 
 int main(int argc, char *argv[])
 {
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    App app;
 
-    GLFWwindow *window = glfwCreateWindow(800, 600, "Horrific Engine", NULL, NULL);
-    if (!window)
-    {
-        glfwTerminate();
+    bool result = AppInit(&app, 800, 600, "Horrific Engine");
+
+    if (!result)
         return EXIT_FAILURE;
-    }
-    glfwMakeContextCurrent(window);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    while (!AppShouldClose(&app))
     {
-        return EXIT_FAILURE;
+        AppUpdate(&app, 1);
+        AppRender(&app, 1);
     }
 
-    glfwSetFramebufferSizeCallback(window, FrameBufferSizeCallback);
-
-    while (!glfwWindowShouldClose(window))
-    {
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
-
-    glfwTerminate();
+    AppFinish(&app);
     return EXIT_SUCCESS;
-}
-
-void FrameBufferSizeCallback(GLFWwindow *window, int width, int height)
-{
-    glViewport(0, 0, width, height);
 }

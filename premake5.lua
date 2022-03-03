@@ -9,7 +9,7 @@ project "HorrificEngine"
     libdirs { "vendor/glad", "vendor/glfw" }
     pchheader "include/pch.h"
 
-    files { "include/**.h", "src/**.c", "src/**.cpp", "src/memory/*.c" }
+    files { "include/**.h", "src/**.c", "src/**.cpp", "src/core/*.cpp" }
 
     cppdialect "C++17"
 
