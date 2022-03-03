@@ -5,19 +5,34 @@ project "HorrificEngine"
     kind "ConsoleApp"
     language "C++"
     targetdir "bin/%{cfg.buildcfg}"
-    includedirs { "include/", "vendor/glad/include/glad/", "vendor/glad/include/KHR/" }
+    includedirs { "include/", "vendor/glad/include/glad/", "vendor/glad/include/KHR/", "vendor/glfw/include" }
+    libdirs { "vendor/glad", "vendor/glfw" }
     pchheader "include/pch.h"
 
-    files { "**.h", "**.c", "**.cpp" }
+    files { "include/**.h", "src/**.c", "src/**.cpp", "src/memory/*.c" }
+
+    cppdialect "C++17"
+
+    if os.target() == "windows" then
+        defines { "WINDOWS" }
+        links {"opengl32", "glad", "glfw3", "gdi32", "glu32"}
+    elseif os.target() == "linux" then
+        defines { "LINUX" }
+        links {"GL", "glad", "glfw3"}
+    end
 
     filter "configurations:Debug"
-
         defines { "DEBUG" }
         symbols "On"
-    
+
     filter "configurations:Release"
         defines { "RELEASE" }
         symbols "Off"
 
-    filter "action:gmake2"
-        buildoptions { "CC=gcc" }
+    filter {"action:gmake2"}
+        toolset "gcc"
+        makesettings {"CC:=gcc", "CXX:=g++", "AR:=ar"}
+
+    filter {"action:gmake"}
+        toolset "gcc"
+        makesettings {"CC:=gcc", "CXX:=g++", "AR:=ar"}
