@@ -18,7 +18,8 @@ project "HorrificEngine"
         links {"opengl32", "glad", "glfw3", "gdi32", "glu32"}
     elseif os.target() == "linux" then
         defines { "LINUX" }
-        links {"GL", "glad", "glfw3"}
+        links {"glfw", "GL", "pthread", "Xrandr", "glad", "dl"}
+        buildoptions {"-Wl", "--start-group"}
     end
 
     filter "configurations:Debug"
