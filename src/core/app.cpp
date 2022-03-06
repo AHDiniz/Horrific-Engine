@@ -42,13 +42,12 @@ bool AppInit(App *app, int width, int height, const char *name)
     glfwSetFramebufferSizeCallback(app->window, FrameBufferSizeCallback);
 
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    char vertexShaderSrc[512];
-    FILE *vertexShaderFile = fopen("assets/shaders/vertex.glsl", "r");
-    while (!feof(vertexShaderFile))
-    {
-        fread(vertexShaderSrc, 512, 1, vertexShaderFile);
-    }
-    glShaderSource(vertexShader, 1, (const char *const *)&vertexShaderSrc, nullptr);
+    std::string vertexShaderSrc = "#version 460 core\n"
+        "layout (location = 0) in vec3 aPos;\n"
+        "void main() {\n"
+        "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n"
+        "}";
+    glShaderSource(vertexShader, 1, (const char *const*)vertexShaderSrc.c_str(), nullptr);
     glCompileShader(vertexShader);
     int success;
     char infoLog[512];
@@ -61,13 +60,12 @@ bool AppInit(App *app, int width, int height, const char *name)
     }
 
     unsigned int fragmentShader = glCreateShader(GL_VERTEX_SHADER);
-    char fragmentShaderSrc[512];
-    FILE *fragmentShaderFile = fopen("assets/shaders/fragment.glsl", "r");
-    while (!feof(fragmentShaderFile))
-    {
-        fread(fragmentShaderSrc, 512, 1, fragmentShaderFile);
-    }
-    glShaderSource(fragmentShader, 1, (const char *const *)&fragmentShaderSrc, nullptr);
+    std::string fragmentShaderSrc = "#version 460 core\n"
+        "out vec4 FragColor;\n"
+        "void main() {\n"
+        "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+        "}";
+    glShaderSource(fragmentShader, 1, (const char *const*)fragmentShaderSrc.c_str(), nullptr);
     glCompileShader(fragmentShader);
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
     if (!success)
