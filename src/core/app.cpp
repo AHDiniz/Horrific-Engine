@@ -10,7 +10,7 @@ float vertices[] = {
 };
 
 unsigned int vbo, vao;
-
+unsigned int vertexShader, fragmentShader;
 unsigned int shaderProgram;
 
 void FrameBufferSizeCallback(GLFWwindow *window, int width, int height)
@@ -41,80 +41,70 @@ bool AppInit(App *app, int width, int height, const char *name)
 
     glfwSetFramebufferSizeCallback(app->window, FrameBufferSizeCallback);
 
-    glGenBuffers(1, &vbo);
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
+    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    char vertexShaderSrc[512];
     FILE *vertexShaderFile = fopen("assets/shaders/vertex.glsl", "r");
-    char vertexStr[256];
     while (!feof(vertexShaderFile))
     {
-        fread(vertexStr, sizeof(vertexStr), 1, vertexShaderFile);
+        fread(vertexShaderSrc, 512, 1, vertexShaderFile);
     }
-
-    fclose(vertexShaderFile);
-
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, (const char * const*)&vertexStr, nullptr);
+    glShaderSource(vertexShader, 1, (const char *const *)&vertexShaderSrc, nullptr);
     glCompileShader(vertexShader);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)nullptr);
-    glEnableVertexAttribArray(0);
-
-    int vertexSuccess;
-    char vertexLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vertexSuccess);
-
-    if (!vertexSuccess)
+    int success;
+    char infoLog[512];
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success)
     {
-        glGetShaderInfoLog(vertexShader, 512, nullptr, vertexLog);
-        printf("Error in vertex shader compilation: %s\n", vertexLog);
+        glGetShaderInfoLog(vertexShader, 512, nullptr, (char *)&infoLog);
+        printf("Error in vertex shader compilation: %s\n", infoLog);
+        return false;
     }
 
-    FILE *fragShaderFile = fopen("assets/shaders/fragment.glsl", "r");
-    char fragStr[256];
-    while (!feof(fragShaderFile))
+    unsigned int fragmentShader = glCreateShader(GL_VERTEX_SHADER);
+    char fragmentShaderSrc[512];
+    FILE *fragmentShaderFile = fopen("assets/shaders/fragment.glsl", "r");
+    while (!feof(fragmentShaderFile))
     {
-        fread(fragStr, sizeof(fragStr), 1, fragShaderFile);
+        fread(fragmentShaderSrc, 512, 1, fragmentShaderFile);
     }
-
-    fclose(fragShaderFile);
-
-    unsigned int fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragShader, 1, (const char * const*)&fragStr, nullptr);
-    glCompileShader(fragShader);
-
-    int fragSuccess;
-    char fragLog[512];
-    glGetShaderiv(fragShader, GL_COMPILE_STATUS, &fragSuccess);
-
-    if (!fragSuccess)
+    glShaderSource(fragmentShader, 1, (const char *const *)&fragmentShaderSrc, nullptr);
+    glCompileShader(fragmentShader);
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success)
     {
-        glGetShaderInfoLog(fragShader, 512, nullptr, fragLog);
-        printf("Error in fragment shader compilation: %s\n", fragLog);
+        glGetShaderInfoLog(fragmentShader, 512, nullptr, (char *)&infoLog);
+        printf("Error in fragment shader compilation: %s\n", infoLog);
+        return false;
     }
 
     shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragShader);
+    glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
-
-    int linkSuccess;
-    char linkLog[512];
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &linkSuccess);
-    if (!linkSuccess)
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success)
     {
-        glGetProgramInfoLog(shaderProgram, 512, nullptr, linkLog);
-        printf("Error in shader program linking: %s\n", linkLog);
+        glGetProgramInfoLog(shaderProgram, 512, nullptr, (char *)&infoLog);
+        printf("Error in shader program linking: %s\n", infoLog);
+        return false;
     }
 
-    glUseProgram(shaderProgram);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+    
     glBindVertexArray(vao);
 
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragShader);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 
     return true;
 }
@@ -135,6 +125,8 @@ void AppRender(App *app, float aspectRatio)
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    glUseProgram(shaderProgram);
+    glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
     glfwSwapBuffers(app->window);
@@ -143,5 +135,9 @@ void AppRender(App *app, float aspectRatio)
 
 void AppFinish(App *app)
 {
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &vbo);
+    glDeleteProgram(shaderProgram);
+
     glfwTerminate();
 }

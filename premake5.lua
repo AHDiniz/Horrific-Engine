@@ -19,7 +19,6 @@ project "HorrificEngine"
     elseif os.target() == "linux" then
         defines { "LINUX" }
         links {"glfw", "GL", "pthread", "Xrandr", "glad", "dl"}
-        buildoptions {"-Wl", "--start-group"}
     end
 
     filter "configurations:Debug"
