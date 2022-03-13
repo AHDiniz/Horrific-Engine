@@ -340,7 +340,7 @@ inline Vector2i Normal(const Vector2i &a)
 inline bool operator == (const Vector2i &a, const Vector2i &b)
 {
     Vector2i diff = a - b;
-    return Length(diff) <= EPSILON;
+    return Length(diff) == 0;
 }
 
 inline bool operator != (const Vector2i &a, const Vector2i &b)
@@ -596,7 +596,7 @@ inline Vector3i Normal(const Vector3i &a)
 inline bool operator == (const Vector3i &a, const Vector3i &b)
 {
     Vector3i diff = a - b;
-    return Length(diff) <= EPSILON;
+    return Length(diff) == 0;
 }
 
 inline bool operator != (const Vector3i &a, const Vector3i &b)
@@ -758,6 +758,188 @@ inline bool operator == (const Vector4 &a, const Vector4 &b)
 }
 
 inline bool operator != (const Vector4 &a, const Vector4 &b)
+{
+    return !(a == b);
+}
+
+inline Vector4i operator + (const Vector4i &a, const Vector4i &b)
+{
+    Vector4i s;
+    for (int i = 0; i < 4; ++i)
+        s.data[i] = a.data[i] + b.data[i];
+    return s;
+}
+
+inline Vector4i operator - (const Vector4i &a, const Vector4i &b)
+{
+    Vector4i s;
+    for (int i = 0; i < 4; ++i)
+        s.data[i] = a.data[i] - b.data[i];
+    return s;
+}
+
+inline Vector4i operator * (const Vector4i &a, const int c)
+{
+    Vector4i s;
+    for (int i = 0; i < 4; ++i)
+        s.data[i] = a.data[i] * c;
+    return s;
+}
+
+inline Vector4i operator * (const int c, const Vector4i &a)
+{
+    return a * c;
+}
+
+inline int operator * (const Vector4i &a, const Vector4i &b)
+{
+    int d = 0;
+    for (int i = 0; i < 4; ++i)
+        d += a.data[i] * b.data[i];
+    return d;
+}
+
+inline Vector4i NonUniformMultiply(const Vector4i &a, const Vector4i &b)
+{
+    Vector4i m;
+    for (int i = 0; i < 4; ++i)
+        m.data[i] = a.data[i] * b.data[i];
+    return m;
+}
+
+inline int SquaredLength(const Vector4i &a)
+{
+    int sl = 0;
+    for (int i = 0; i < 4; ++i)
+        sl += a.data[i] * a.data[i];
+    return sl;
+}
+
+inline int Length(const Vector4i &a)
+{
+    int sl = 0;
+    for (int i = 0; i < 4; ++i)
+        sl += a.data[i] * a.data[i];
+    return (int)sqrtf(sl);
+}
+
+inline void Normalize(Vector4i &a)
+{
+    int l = Length(a);
+    if (l == 0)
+        return;
+    int il = 1 / l;
+    for (int i = 0; i < 4; ++i)
+        a.data[i] *= il;
+}
+
+inline Vector4i Normal(const Vector4i &a)
+{
+    Vector4i n;
+    for (int i = 0; i < 3; ++i)
+        n.data[i] = a.data[i];
+    Normalize(n);
+    return n;
+}
+
+inline bool operator == (const Vector4i &a, const Vector4i &b)
+{
+    Vector4i diff = a - b;
+    return Length(diff) == 0;
+}
+
+inline bool operator != (const Vector4i &a, const Vector4i &b)
+{
+    return !(a == b);
+}
+
+inline Vector4ui operator + (const Vector4ui &a, const Vector4ui &b)
+{
+    Vector4ui s;
+    for (int i = 0; i < 4; ++i)
+        s.data[i] = a.data[i] + b.data[i];
+    return s;
+}
+
+inline Vector4ui operator - (const Vector4ui &a, const Vector4ui &b)
+{
+    Vector4ui s;
+    for (int i = 0; i < 4; ++i)
+        s.data[i] = a.data[i] - b.data[i];
+    return s;
+}
+
+inline Vector4ui operator * (const Vector4ui &a, const int c)
+{
+    Vector4ui s;
+    for (int i = 0; i < 4; ++i)
+        s.data[i] = a.data[i] * c;
+    return s;
+}
+
+inline Vector4ui operator * (const int c, const Vector4ui &a)
+{
+    return a * c;
+}
+
+inline unsigned int operator * (const Vector4ui &a, const Vector4ui &b)
+{
+    unsigned int d = 0;
+    for (int i = 0; i < 4; ++i)
+        d += a.data[i] * b.data[i];
+    return d;
+}
+
+inline Vector4ui NonUniformMultiply(const Vector4ui &a, const Vector4ui &b)
+{
+    Vector4ui m;
+    for (int i = 0; i < 4; ++i)
+        m.data[i] = a.data[i] * b.data[i];
+    return m;
+}
+
+inline unsigned int SquaredLength(const Vector4ui &a)
+{
+    unsigned int sl = 0;
+    for (int i = 0; i < 4; ++i)
+        sl += a.data[i] * a.data[i];
+    return sl;
+}
+
+inline unsigned int Length(const Vector4ui &a)
+{
+    unsigned int sl = 0;
+    for (int i = 0; i < 4; ++i)
+        sl += a.data[i] * a.data[i];
+    return (unsigned int)sqrtf(sl);
+}
+
+inline void Normalize(Vector4ui &a)
+{
+    unsigned int l = Length(a);
+    if (l == 0)
+        return;
+    unsigned int il = 1 / l;
+    for (int i = 0; i < 4; ++i)
+        a.data[i] *= il;
+}
+
+inline Vector4ui Normal(const Vector4ui &a)
+{
+    Vector4ui n;
+    for (int i = 0; i < 3; ++i)
+        n.data[i] = a.data[i];
+    Normalize(n);
+    return n;
+}
+
+inline bool operator == (const Vector4ui &a, const Vector4ui &b)
+{
+    Vector4ui diff = a - b;
+    return Length(diff) == 0;
+}
+
+inline bool operator != (const Vector4ui &a, const Vector4ui &b)
 {
     return !(a == b);
 }
