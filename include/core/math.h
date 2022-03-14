@@ -90,6 +90,39 @@ typedef struct vector4ui
     };
 } Vector4ui;
 
+typedef struct matrix4
+{
+    union
+    {
+        float data[16];
+        struct
+        {
+            Vector4 right, up, forward, position;
+        };
+        struct // vector based element access
+        {
+            float xx; float xy; float xz; float xw;
+            float yx; float yy; float yz; float yw;
+            float zx; float zy; float zz; float zw;
+            float wx; float wy; float wz; float ww;
+        };
+        struct // column major element access
+        {
+            float c0r0; float c0r1; float c0r2; float c0r3;
+            float c1r0; float c1r1; float c1r2; float c1r3;
+            float c2r0; float c2r1; float c2r2; float c2r3;
+            float c3r0; float c3r1; float c3r2; float c3r3;
+        };
+        struct // row major element access
+        {
+            float r0c0; float r0c1; float r0c2; float r0c3;
+            float r1c0; float r1c1; float r1c2; float r1c3;
+            float r2c0; float r2c1; float r2c2; float r2c3;
+            float r3c0; float r3c1; float r3c2; float r3c3;
+        };
+    };
+} Matrix4;
+
 inline Vector2 operator + (const Vector2 &a, const Vector2 &b)
 {
     Vector2 s;
@@ -942,6 +975,88 @@ inline bool operator == (const Vector4ui &a, const Vector4ui &b)
 inline bool operator != (const Vector4ui &a, const Vector4ui &b)
 {
     return !(a == b);
+}
+
+inline bool operator == (const Matrix4 &a, const Matrix4 &b)
+{
+    for (int i = 0; i < 16; ++i)
+    {
+        if (fabsf(a.data[i] - b.data[i]) < EPSILON)
+            return false;
+    }
+    return true;
+}
+
+inline bool operator != (const Matrix4 &a, const Matrix4 &b)
+{
+    return !(a == b);
+}
+
+inline Matrix4 operator + (const Matrix4 &a, const Matrix4 &b)
+{
+    Matrix4 s;
+    for (int i = 0; i < 16; ++i)
+        s.data[i] = a.data[i] + b.data[i];
+    return s;
+}
+
+inline Matrix4 operator - (const Matrix4 &a, const Matrix4 &b)
+{
+    Matrix4 s;
+    for (int i = 0; i < 16; ++i)
+        s.data[i] = a.data[i] - b.data[i];
+    return s;
+}
+
+inline Matrix4 operator * (const Matrix4 &a, const float c)
+{
+    Matrix4 m;
+    for (int i = 0; i < 16; ++i)
+        m.data[i] = a.data[i] * c;
+    return m;
+}
+
+inline Matrix4 operator * (const float c, const Matrix4 &a)
+{
+    return a * c;
+}
+
+inline float ColumnRowDot(const Matrix4 &a, const Matrix4 &b, const int aRow, const int bCol)
+{
+    float result = 0;
+    for (int i = 0; i < 4; ++i)
+        result += a.data[i * 4 + aRow] * b.data[i + bCol * 4];
+    return result;
+}
+
+inline Matrix4 operator * (const Matrix4 &a, const Matrix4 &b)
+{
+    Matrix4 m;
+    for (int i = 0; i < 4; ++i)
+        for (int j = 0; i < 4; ++j)
+            m.data[i * 4 + j] = ColumnRowDot(a, b, j, i);
+    return m;
+}
+
+inline Vector4 operator * (const Matrix4 &a, const Vector4 &b)
+{
+    Vector4 t;
+    t.x = b.x * a.data[0 * 4 + 0] + b.y * a.data[1 * 4 + 0] + b.z * a.data[2 * 4 + 0] + b.w * a.data[3 * 4 + 0];
+    t.y = b.x * a.data[0 * 4 + 1] + b.y * a.data[1 * 4 + 1] + b.z * a.data[2 * 4 + 1] + b.w * a.data[3 * 4 + 1];
+    t.z = b.x * a.data[0 * 4 + 2] + b.y * a.data[1 * 4 + 2] + b.z * a.data[2 * 4 + 2] + b.w * a.data[3 * 4 + 2];
+    t.w = b.x * a.data[0 * 4 + 3] + b.y * a.data[1 * 4 + 3] + b.z * a.data[2 * 4 + 3] + b.w * a.data[3 * 4 + 3];
+    return t;
+}
+
+inline Vector3 operator * (const Matrix4 &a, const Vector3 &b)
+{
+    Vector4 aux;
+    aux.x = b.x;
+    aux.y = b.y;
+    aux.z = b.z;
+    aux.w = 0;
+    aux = a * aux;
+    
 }
 
 #endif
