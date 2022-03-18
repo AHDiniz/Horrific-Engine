@@ -1038,7 +1038,7 @@ inline Matrix4 operator * (const Matrix4 &a, const Matrix4 &b)
     return m;
 }
 
-inline Vector4 operator * (const Matrix4 &a, const Vector4 &b)
+inline Vector4 TransformVec4(const Matrix4 &a, const Vector4 &b)
 {
     Vector4 t;
     t.x = b.x * a.data[0 * 4 + 0] + b.y * a.data[1 * 4 + 0] + b.z * a.data[2 * 4 + 0] + b.w * a.data[3 * 4 + 0];
@@ -1048,15 +1048,60 @@ inline Vector4 operator * (const Matrix4 &a, const Vector4 &b)
     return t;
 }
 
-inline Vector3 operator * (const Matrix4 &a, const Vector3 &b)
+inline Vector3 TransformVec3(const Matrix4 &a, const Vector3 &b)
 {
     Vector4 aux;
     aux.x = b.x;
     aux.y = b.y;
     aux.z = b.z;
     aux.w = 0;
-    aux = a * aux;
-    
+    Vector4 auxT = TransformVec4(a, aux);
+    Vector3 t;
+    t.x = auxT.x;
+    t.y = auxT.y;
+    t.z = auxT.z;
+    return t;
+}
+
+inline Vector3 TransformPoint(const Matrix4 &a, const Vector3 &b)
+{
+    Vector4 aux;
+    aux.x = b.x;
+    aux.y = b.y;
+    aux.z = b.z;
+    aux.w = 1;
+    Vector4 auxT = TransformVec4(a, aux);
+    Vector3 t;
+    t.x = auxT.x;
+    t.y = auxT.y;
+    t.z = auxT.z;
+    return t;
+}
+
+inline void SwapFloat(float &a, float &b)
+{
+    float t = a;
+    a = b;
+    b = t;
+}
+
+inline void Transpose(Matrix4 &a)
+{
+    SwapFloat(a.yx, a.xy);
+    SwapFloat(a.zx, a.xz);
+    SwapFloat(a.wx, a.xw);
+    SwapFloat(a.zy, a.yz);
+    SwapFloat(a.wy, a.yw);
+    SwapFloat(a.wz, a.zw);
+}
+
+inline Matrix4 Transposed(const Matrix4 &a)
+{
+    Matrix4 t;
+    for (int i = 0; i < 16; ++i)
+        t.data[i] = a.data[i];
+    Transpose(t);
+    return t;
 }
 
 #endif
