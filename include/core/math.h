@@ -123,6 +123,8 @@ typedef struct matrix4
     };
 } Matrix4;
 
+typedef Vector4 Quaternion;
+
 inline Vector2 operator + (const Vector2 &a, const Vector2 &b)
 {
     Vector2 s;
@@ -1103,5 +1105,88 @@ inline Matrix4 Transposed(const Matrix4 &a)
     Transpose(t);
     return t;
 }
+
+inline float ThreeByThreeMinor(const Matrix4 &mat, const int col0, const int col1, const int col2, const int row0, const int row1, const int row2)
+{
+    return (mat.data[col0 * 4 + row0] * (mat.data[col1 * 4 + row1] * mat.data[col2 * 4 + row2] - mat.data[col1 * 4 + row2] * mat.data[col2 * 4 + row1])
+        - mat.data[col1 * 4 + row0] * (mat.data[col0 * 4 + row1] * mat.data[col2 * 4 + row2] - mat.data[col0 * 4 + row2] * mat.data[col2 * 4 + row1])
+        + mat.data[col2 * 4 + row0] * (mat.data[col0 * 4 + row1] * mat.data[col1 * 4 + row2] - mat.data[col0 * 4 + row2] * mat.data[col1 * 4 + row1]));
+}
+
+inline float Determinant(const Matrix4 &a)
+{
+    return a.data[0] * ThreeByThreeMinor(a, 1, 2, 3, 1, 2, 3)
+        - a.data[4] * ThreeByThreeMinor(a, 0, 2, 3, 1, 2, 3)
+        + a.data[8] * ThreeByThreeMinor(a, 0, 1, 3, 1, 2, 3)
+        - a.data[12] * ThreeByThreeMinor(a, 0, 1, 2, 1, 2, 3);
+}
+
+inline Matrix4 Adjugate(const Matrix4 &a)
+{
+    Matrix4 cofactor;
+    cofactor.data[0] = ThreeByThreeMinor(a, 1, 2, 3, 1, 2, 3);
+    cofactor.data[1] = - ThreeByThreeMinor(a, 1, 2, 3, 0, 2, 3);
+    cofactor.data[2] = ThreeByThreeMinor(a, 1, 2, 3, 0, 1, 3);
+    cofactor.data[3] = - ThreeByThreeMinor(a, 1, 2, 3, 0, 1, 2);
+    cofactor.data[4] = ThreeByThreeMinor(a, 0, 2, 3, 1, 2, 3);
+    cofactor.data[5] = - ThreeByThreeMinor(a, 0, 2, 3, 0, 2, 3);
+    cofactor.data[6] = ThreeByThreeMinor(a, 0, 2, 3, 0, 1, 3);
+    cofactor.data[7] = - ThreeByThreeMinor(a, 0, 2, 3, 0, 1, 2);
+    cofactor.data[8] = ThreeByThreeMinor(a, 0, 1, 3, 1, 2, 3);
+    cofactor.data[9] = - ThreeByThreeMinor(a, 0, 1, 3, 0, 2, 3);
+    cofactor.data[10] = ThreeByThreeMinor(a, 0, 1, 3, 0, 1, 3);
+    cofactor.data[11] = - ThreeByThreeMinor(a, 0, 1, 3, 0, 1, 2);
+    cofactor.data[12] = ThreeByThreeMinor(a, 0, 1, 2, 1, 2, 3);
+    cofactor.data[13] = - ThreeByThreeMinor(a, 0, 1, 2, 0, 2, 3);
+    cofactor.data[14] = ThreeByThreeMinor(a, 0, 1, 2, 0, 1, 3);
+    cofactor.data[15] = - ThreeByThreeMinor(a, 0, 1, 2, 0, 1, 2);
+    return Transposed(cofactor);
+}
+
+inline Matrix4 Inverse(const Matrix4 &a)
+{
+    float det = Determinant(a);
+    Matrix4 inverse;
+
+    if (det == .0f)
+    {
+        for (int i = 0; i < 16; ++i)
+            inverse.data[i] = 0;
+        return inverse;
+    }
+
+    inverse = Adjugate(m);
+    return inverse * (1.0f / det);
+}
+
+inline void Invert(Matrix4 &a)
+{
+    float det = Determinant(a);
+    Matrix4 inverse;
+
+    if (det == .0f)
+    {
+        return;
+    }
+
+    Matrix4 adj = Adjugate(m);
+    m = adj * (1.0f / det);
+}
+
+inline Vector3 Vector(const Quaternion &q)
+{
+    Vector3 v;
+    v.x = q.x;
+    v.y = q.y;
+    v.z = q.z;
+    return v;
+}
+
+inline float Scalar(const Quaternion &q)
+{
+    return q.w;
+}
+
+
 
 #endif
