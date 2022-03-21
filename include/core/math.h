@@ -1187,6 +1187,97 @@ inline float Scalar(const Quaternion &q)
     return q.w;
 }
 
+inline Quaternion AngleAxis(const float angle, const Vector3 &axis)
+{
+    Vector3 norm = Normalized(axis);
+    float s = sinf(angle * .5f);
 
+    Quaternion q;
+    q.x = norm.x * s;
+    q.y = norm.y * s;
+    q.z = norm.z * s;
+    q.w = cosf(angle * .5f);
+
+    return q;
+}
+
+inline Quaternion FromToRotQuat(const Vector3 &from, const Vector3 &to)
+{
+    Vector3 f = Normalized(from);
+    Vector3 t = Normalized(to);
+
+    Quaternion r;
+
+    if (f == t)
+    {
+        r.x = r.y = r.z = r.w = 0;
+        return r;
+    }
+    else if (f == (t * -1.0f))
+    {
+        Vector3 ortho;
+        ortho.x = 1;
+        ortho.y = ortho.z = 0;
+
+        if (fabsf(f.y) < fabsf(f.x))
+        {
+            ortho.y = 1;
+            ortho.x = ortho.z = 0;
+        }
+
+        if (fabsf(f.z) < fabsf(f.y) && fabsf(f.z) < fabsf(f.x))
+        {
+            ortho.z = 1;
+            ortho.x = ortho.y = 0;
+        }
+
+        Vector3 axis = Normalized(Cross(f, ortho));
+        
+        r.x = axis.x;
+        r.y = axis.y;
+        r.z = axis.z;
+        r.w = 0;
+
+        return r;
+    }
+
+    Vector3 half = Normalized(f + t);
+    Vector3 axis = Cross(f, half);
+
+    r.x = axis.x;
+    r.y = axis.y;
+    r.z = axis.z;
+    r.w = f * half;
+
+    return r;
+}
+
+inline Quaternion operator - (const Quaternion &a)
+{
+    Quaternion n;
+    for (int i = 0; i < 4; ++i)
+        n.data[i] = -a.data[i];
+    return n;
+}
+
+inline bool SameRotation(const Quaternion &a, const Quaternion &b)
+{
+    return (fabsf(a.x - b.x) <= EPSILON && fabsf(a.y - b.y) <= EPSILON && fabsf(a.z - b.z) <= EPSILON && fabsf(a.w - b.w) <= EPSILON) ||
+        (fabsf(a.x + b.x) <= EPSILON && fabsf(a.y + b.y) <= EPSILON && fabsf(a.z + b.z) <= EPSILON && fabsf(a.w + b.w) <= EPSILON);
+}
+
+inline Quaternion operator * (const Quaternion &a, const Quaternion &b)
+{
+    Quaternion m;
+    m.w = (Scalar(a) * Scalar(b)) - Vector(a) * Vector(b);
+
+    Vector3 v = (Vector(a) * Scalar(b)) + (Vector(b) * Scalar(a)) + Cross(Vector(b), Vector(a));
+
+    m.x = v.x;
+    m.y = v.y;
+    m.z = v.z;
+
+    return m;
+}
 
 #endif
