@@ -1266,14 +1266,6 @@ inline bool SameRotation(const Quaternion &a, const Quaternion &b)
         (fabsf(a.x + b.x) <= EPSILON && fabsf(a.y + b.y) <= EPSILON && fabsf(a.z + b.z) <= EPSILON && fabsf(a.w + b.w) <= EPSILON);
 }
 
-inline float Dot(const Quaternion &a, const Quaternion &b)
-{
-    float d = 0;
-    for (int i = 0; i < 4; ++i)
-        d.data[i] += a.data[i] * b.data[i];
-    return d;
-}
-
 inline Quaternion operator * (const Quaternion &a, const Quaternion &b)
 {
     Quaternion m;
@@ -1286,82 +1278,6 @@ inline Quaternion operator * (const Quaternion &a, const Quaternion &b)
     m.z = v.z;
 
     return m;
-}
-
-inline Quaternion Conjugate(const Quaternion &q)
-{
-    Quaternion c;
-    for (int i = 0; i < 3; ++i)
-        c.data[i] = -q.data[i];
-    c.w = q.w;
-    return c;
-}
-
-inline Quaternion Inverse(const Quaternion &q)
-{
-    Quaternion inv;
-    for (int i = 0; i < 4; ++i)
-        inv.data[i] = 0;
-
-    float squaredLength = SquaredLength(q);
-    if (squaredLength < EPSILON)
-        return inv;
-    
-    float reciprocate = 1.0f / squaredLength;
-    for (int i = 0; i < 3; ++i)
-        inv.data[i] = -q.data[i] * reciprocate;
-    inv.data[3] = q.data[3] * reciprocate;
-
-    return inv;
-}
-
-inline Vector3 operator * (const Quaternion &q, const Vector3 &v)
-{
-    return Vector(q) * 2.0f * (Vector(q) * v) + v * (Scalar(q) * Scalar(q) - Vector(q) * Vector(q)) + Cross(Vector(q), v) * 2.0f * Scalar(q);
-}
-
-inline Quaternion Mix(const Quaternion &from, const Quaternion &to, const float t)
-{
-    return from * (1.0f - t) + to * t;
-}
-
-inline Quaternion NormalLerp(const Quaternion &from, const Quaternion &to, const float t)
-{
-    return Normalized(from + (to - from) * t);
-}
-
-inline Quaternion operator ^ (const Quaternion &q, const float f)
-{
-    float angle = 2.0f * acosf(Scalar(q));
-    Vector3 axis = Normalized(Vector(q));
-
-    float halfCos = cosf(f * angle * .5f);
-    float halfSin = sinf(f * angle * .5f);
-
-    Quaternion p;
-    p.x = axis.x * halfSin;
-    p.y = axis.y * halfSin;
-    p.z = axis.z * halfSin;
-    p.w = halfCos;
-
-    return p;
-}
-
-inline Quaternion Slerp(const Quaternion &start, const Quaternion &end, const float t)
-{
-    if (fabsf(Dot(start, end)) > 1.0f - EPSILON)
-        return NormalLerp(start, end, t);
-    
-    Quaternion delta = Inverse(start) * end;
-    return Normalized((delta ^ t) * start);
-}
-
-inline Quaternion Sample(const Quaternion &a, const Quaternion &b)
-{
-    if (a * b < .0f)
-        return Slerp(a, -b, .5f);
-    
-    return Slerp(a, b, .5f);
 }
 
 #endif
