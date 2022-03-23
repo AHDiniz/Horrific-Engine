@@ -1,12 +1,51 @@
 #include "core/memory.h"
 #include "pch.h"
 
-void *CreateMemCache(int size)
+Buffer AllocateBuffer(unsigned int limit)
 {
-    return malloc(size);
+
 }
 
-void DeleteMemCache(void *cache)
+Buffer UseAsBuffer(void *location, unsigned int limit)
 {
-    free(cache);
+
 }
+
+void DeallocateBuffer(const Buffer &b)
+{
+
+}
+
+
+StackAllocator CreateStack(Buffer *b, unsigned int estimatedCount)
+{
+
+}
+
+void DestroyStack(StackAllocator &allocator)
+{
+
+}
+
+
+PoolAllocator CreatePool(Buffer *b, unsigned int itemSize, unsigned int estimatedCount)
+{
+
+}
+
+void DestroyPool(PoolAllocator &pool)
+{
+
+}
+
+
+FreeListAllocator CreateFreeList(Buffer *b, unsigned int estimatedCount)
+{
+
+}
+
+void DestroyFreeList(FreeListAllocator &freeList)
+{
+
+}
+
