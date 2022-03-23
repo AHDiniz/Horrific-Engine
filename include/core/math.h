@@ -3,6 +3,7 @@
 #define MATH_H_
 
 #define EPSILON 0.000001f
+#define PI 3.14159265359f
 
 #include "pch.h"
 
@@ -1173,6 +1174,94 @@ inline void Invert(Matrix4 &a)
     m = adj * (1.0f / det);
 }
 
+inline Matrix4 Frustum(float left, float right, float top, float bottom, float near, float far)
+{
+    Matrix4 frustum;
+    for (int i = 0; i < 16; ++i)
+        frustum.data[i] = 0;
+    
+    if (left == right || top == bottom || near == far)
+        return frustum;
+    
+    frustum.c0r0 = (2.0f * near) / (right - 1);
+    frustum.c1r1 = (2.0f * near) / (top - bottom);
+    frustum.c0r2 = (right + left) / (right - left);
+    frustum.c1r2 = (top + bottom) / (top - bottom);
+    frustum.c2r2 = (-(far + near)) / (far - near);
+    frustum.c3r2 = -1;
+    frustum.c2r3 = (-2.0f * far * near) / (far - near);
+
+    return frustum;
+}
+
+inline Matrix4 Perspective(float fieldOfView, float aspectRatio, float near, float far)
+{
+    float ymax = near * tanf(fieldOfView * PI / 360f);
+    float xmax = ymax * aspectRatio;
+
+    return Frustum(-xmax, xmax, -ymax, ymax, near, far);
+}
+
+inline Matrix4 Orthographic(float left, float right, float top, float bottom, float near, float far)
+{
+    Matrix4 ortho;
+    for (int i = 0; i < 16; ++i)
+        ortho.data[i] = 0;
+    
+    if (left == right || top == bottom || near == far)
+        return ortho;
+    
+    ortho.c0r0 = 2.0f / (right - left);
+    ortho.c1r1 = 2.0f / (top - bottom);
+    ortho.c2r2 = -2.0f / (far - near);
+    ortho.c0r3 = -((right + left) / (right - left));
+    ortho.c1r3 = -((top + bottom) / (top - bottom));
+    ortho.c2r3 = -((far + near) / (far - near));
+    ortho.c0r3 = 1.0f;
+
+    return ortho;
+}
+
+inline Matrix4 LookAtMatrix(const Vector3 &position, const Vector3 &target, const Vector3 &up)
+{
+    Matrix4 l;
+    for (int i = 0; i < 16; ++i)
+        l.data[i] = 0;
+
+    Vector3 f = Normalized(target - position) * -1f;
+    Vector3 r = Cross(up, f);
+
+    if (r.x == 0 && r.y == 0 && r.z == 0)
+        return l;
+    
+    Normalize(r);
+    Vector3 u = Normalized(Cross(f, r));
+
+    Vector3 t;
+    t.x = r * position;
+    t.y = u * position;
+    t.z = f * position;
+
+    l.c0r0 = r.x;
+    l.c1r0 = u.x;
+    l.c2r0 = f.x;
+    l.c3r0 = 0;
+    l.c0r1 = r.y;
+    l.c1r1 = u.y;
+    l.c2r1 = f.y;
+    l.c3r1 = 0;
+    l.c0r2 = r.z;
+    l.c1r2 = u.z;
+    l.c2r2 = f.z;
+    l.c3r2 = 0;
+    l.c0r3 = t.x;
+    l.c1r3 = t.y;
+    l.c2r3 = t.z;
+    l.c3r3 = 1;
+
+    return l;
+}
+
 inline Vector3 Vector(const Quaternion &q)
 {
     Vector3 v;
@@ -1201,7 +1290,7 @@ inline Quaternion AngleAxis(const float angle, const Vector3 &axis)
     return q;
 }
 
-inline Quaternion FromToRotQuat(const Vector3 &from, const Vector3 &to)
+inline Quaternion VectorTransitionQuat(const Vector3 &from, const Vector3 &to)
 {
     Vector3 f = Normalized(from);
     Vector3 t = Normalized(to);
@@ -1260,13 +1349,41 @@ inline Quaternion operator - (const Quaternion &a)
     return n;
 }
 
+inline Quaternion Conjugate(const Quaternion &q)
+{
+    Quaternion c;
+    c.x = -q.x;
+    c.y = -q.y;
+    c.z = -q.z;
+    c.w = q.w;
+    return c;
+}
+
+inline Quaternion Inverse(const Quaternion &q)
+{
+    Quaternion inv;
+    for (int i = 0; i < 4; ++i)
+        inv.data[i] = 0;
+
+    float sLen = SquaredLength(q);
+    if (sLen < = EPSILON)
+        return inv;
+    
+    float reciprocate = 1.0f / sLen;
+    for (int i = 0; i < 3; ++i)
+        inv.data[i] = -a.data[i] * reciprocate;
+    inv.w = a.w * reciprocate;
+
+    return inv;
+}
+
 inline bool SameRotation(const Quaternion &a, const Quaternion &b)
 {
     return (fabsf(a.x - b.x) <= EPSILON && fabsf(a.y - b.y) <= EPSILON && fabsf(a.z - b.z) <= EPSILON && fabsf(a.w - b.w) <= EPSILON) ||
         (fabsf(a.x + b.x) <= EPSILON && fabsf(a.y + b.y) <= EPSILON && fabsf(a.z + b.z) <= EPSILON && fabsf(a.w + b.w) <= EPSILON);
 }
 
-inline Quaternion operator * (const Quaternion &a, const Quaternion &b)
+inline Quaternion Multiply(const Quaternion &a, const Quaternion &b)
 {
     Quaternion m;
     m.w = (Scalar(a) * Scalar(b)) - Vector(a) * Vector(b);
@@ -1278,6 +1395,109 @@ inline Quaternion operator * (const Quaternion &a, const Quaternion &b)
     m.z = v.z;
 
     return m;
+}
+
+inline Vector3 operator * (const Quaternion &q, const Vector3 &v)
+{
+    return Vector(q) * 2.0f * (Vector(q) * v) + v * (Scalar(q) * Scalar(q) - Vector(q) * Vector(q)) + Cross(Vector(q), v) * 2.0f * Scalar(q);
+}
+
+inline Quaternion Mix(const Quaternion &from, const Quaternion &to, const float t)
+{
+    return from * (1.0f - t) + to * t;
+}
+
+inline Quaternion NormalLerp(const Quaternion &from, const Quaternion &to, const float t)
+{
+    return Normalized(from + (to - from) * t);
+}
+
+inline Quaternion Power(const Quaterion &q, const float t)
+{
+    float angle = 2.0f * acosf(Scalar(q));
+    Vector3 axis = Normalized(Vector(q));
+
+    float halfCos = cosf(t * angle * .5f);
+    float halfSin = sinf(t * angle * .5f);
+
+    Quaternion p;
+
+    p.x = axis.x * halfSin;
+    p.y = axis.y * halfSin;
+    p.z = axis.z * halfSin;
+    p.w = halfCos;
+
+    return p;
+}
+
+inline Quaternion Slerp(const Quaternion &start, const Quaternion &end, const float t)
+{
+    if (fabsf(start * end) > 1.0f - EPSILON)
+        return NormalLerp(start, end, t);
+    
+    Quaternion delta = Multiply(Inverse(start), end);
+    return Normalized(Multiply(Power(delta, t), start));
+}
+
+inline Quaternion Sample(const Quaternion &a, const Quaternion &b)
+{
+    if (a * b < .0f)
+        return Slerp(a, -b, .5f);
+    
+    return Slerp(a, b, .5f);
+}
+
+inline Quaternion LookRotation(const Vector3 &direction, const Vector3 &up)
+{
+    Vector3 f = Normalized(direction);
+    Vector3 u = Normalized(up);
+    Vector3 r = Cross(u, f);
+    u = Cross(f, r);
+
+    Vector3 k;
+    k.x = k.y = 0; k.z = 1;
+    Quaternion worldToObj = VectorTransitionQuat(k, f);
+
+    Vector3 objUp = worldToObj * up;
+    Quaternion u2u = VectorTransitionQuat(objUp, u);
+
+    Quaternion result = Multiply(worldToObj, u2u);
+    return Normalized(result);
+}
+
+inline Matrix4 QuaternionToMatrix4(const Quaternion &q)
+{
+    Matrix4 m;
+    for (int i = 0; i < 16; ++i)
+        m.data[i] = 0;
+    
+    Vector3 r; r.x = 1; r.y = 0; r.z = 0;
+    Vector3 u; u.x = 0; u.y = 1; u.z = 0;
+    Vector3 f; f.x = 0; f.y = 0; f.z = 1;
+    r = q * r;
+    u = q * u;
+    f = q * f;
+
+    m.c0r0 = r.x; m.c1r0 = r.y; m.c2r0 = r.z;
+    m.c0r1 = u.x; m.c1r1 = u.y; m.c2r1 = u.z;
+    m.c0r2 = f.x; m.c1r2 = f.y; m.c2r2 = f.z;
+    m.c3r3 = 1;
+
+    return m;
+}
+
+inline Quaternion Matrix4ToQuaternion(const Matrix4 &m)
+{
+    Vector3 up; up.x = m.up.x; up.y = m.up.y; up.z = m.up.z;
+    Vector3 forward; forward.x = m.forward.x; forward.y = m.forward.y; forward.z = m.forward.z;
+
+    Normalize(up);
+    Normalize(forward);
+
+    Vector3 right = Cross(up, forward);
+    up = Cross(forward, right);
+
+    return LookRotation(forward, up);
 }
 
 #endif
