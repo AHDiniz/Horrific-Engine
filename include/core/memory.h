@@ -40,9 +40,12 @@ void DeallocateBuffer(const Buffer &b);
 
 StackAllocator CreateStack(Buffer *b, unsigned int estimatedCount);
 void DestroyStack(StackAllocator &allocator);
+void *AllocateInStack(StackAllocator &stack, unsigned int size);
+void PopFromStack(StackAllocator &stack);
 
 PoolAllocator CreatePool(Buffer *b, unsigned int itemSize, unsigned int estimatedCount);
 void DestroyPool(PoolAllocator &pool);
+void *AllocateInPool(PoolAllocator &pool, unsigned int size);
 
 FreeListAllocator CreateFreeList(Buffer *b, unsigned int estimatedCount);
 void DestroyFreeList(FreeListAllocator &freeList);
