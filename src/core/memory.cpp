@@ -43,7 +43,7 @@ StackAllocator CreateStack(Buffer *b, unsigned int estimatedCount)
 
 void DestroyStack(StackAllocator &allocator)
 {
-    free(stack.itemPointers);
+    free(allocator.itemPointers);
 }
 
 void *AllocateInStack(StackAllocator &stack, unsigned int size)
@@ -58,7 +58,7 @@ void *AllocateInStack(StackAllocator &stack, unsigned int size)
     
     if (stack.count >= stack.maxItems)
     {
-        stack.itemPointers = realloc(stack.itemPointers, 2 * stack.maxItems);
+        stack.itemPointers = (void**)realloc(stack.itemPointers, 2 * stack.maxItems);
         stack.maxItems *= 2;
     }
 
@@ -84,7 +84,7 @@ PoolAllocator CreatePool(Buffer *b, unsigned int itemSize, unsigned int estimate
     PoolAllocator pool;
 
     pool.buffer = b;
-    pool.itemsize = itemSize;
+    pool.itemSize = itemSize;
     pool.count = 0;
     pool.items = (void**)malloc(sizeof(void*) * estimatedCount);
     for (int i = 0; i < estimatedCount; ++i)
@@ -110,14 +110,39 @@ void *AllocateInPool(PoolAllocator &pool)
     if (pool.buffer->size + pool.itemSize >= pool.buffer->limit)
         return result;
     
-    int freeItemCount = (pool.buffer->size / pool.itemSize) - pool.count;
+    if (pool.count == 0)
+    {
+        pool.items[0] = pool.buffer->data;
+        pool.freePositions[0] = pool.buffer->data + pool.itemSize;
+        pool.count++;
+        result = pool.items[0];
+        return result;
+    }
 
-    
+    int freeItemCount = (pool.buffer->size / pool.itemSize) - pool.count;
+    pool.items[pool.count] = pool.freePositions[freeItemCount - 1];
+    pool.freePositions[freeItemCount - 1] = nullptr;
+    result = pool.items[pool.count];
+    pool.count++;
 
     return result;
 }
 
 void DeallocateFromPool(PoolAllocator &pool, void *location)
 {
+    for (int i = 0; i < pool.count; ++i)
+    {
+        if (pool.items[i] == location)
+        {
+            int freeItemCount = (pool.buffer->size / pool.itemSize) - pool.count;
+            pool.freePositions[freeItemCount - 1] = pool.items[i];
 
+            for (int j = i; j < pool.count - 1; ++j)
+                pool.items[j] = pool.items[j + 1];
+            
+            pool.count--;
+
+            break;
+        }
+    }
 }
