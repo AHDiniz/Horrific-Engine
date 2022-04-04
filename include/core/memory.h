@@ -7,7 +7,7 @@ typedef struct buffer
     void *data;
     unsigned int size;
     unsigned int limit;
-};
+} Buffer;
 
 typedef struct stackAllocator
 {

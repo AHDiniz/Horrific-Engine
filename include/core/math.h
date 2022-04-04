@@ -265,8 +265,8 @@ inline Vector2 Slerp(const Vector2 &a, const Vector2 &b, const float t)
     if (t < .01f)
         return Lerp(a, b, t);
     
-    Vector2 from = Normalized(a);
-    Vector2 to = Normalized(b);
+    Vector2 from = Normal(a);
+    Vector2 to = Normal(b);
 
     float theta = Angle(from, to);
     float sinTheta = sinf(theta);
@@ -279,7 +279,7 @@ inline Vector2 Slerp(const Vector2 &a, const Vector2 &b, const float t)
 
 inline Vector2 NormalLerp(const Vector2 &a, const Vector2 &b, const float t)
 {
-    return Normalized(Lerp(a, b, t));
+    return Normal(Lerp(a, b, t));
 }
 
 inline bool operator == (const Vector2 &a, const Vector2 &b)
@@ -521,8 +521,8 @@ inline Vector3 Slerp(const Vector3 &a, const Vector3 &b, const float t)
     if (t < .01f)
         return Lerp(a, b, t);
     
-    Vector3 from = Normalized(a);
-    Vector3 to = Normalized(b);
+    Vector3 from = Normal(a);
+    Vector3 to = Normal(b);
 
     float theta = Angle(from, to);
     float sinTheta = sinf(theta);
@@ -535,7 +535,7 @@ inline Vector3 Slerp(const Vector3 &a, const Vector3 &b, const float t)
 
 inline Vector3 NormalLerp(const Vector3 &a, const Vector3 &b, const float t)
 {
-    return Normalized(Lerp(a, b, t));
+    return Normal(Lerp(a, b, t));
 }
 
 inline bool operator == (const Vector3 &a, const Vector3 &b)
@@ -770,8 +770,8 @@ inline Vector4 Slerp(const Vector4 &a, const Vector4 &b, const float t)
     if (t < .01f)
         return Lerp(a, b, t);
     
-    Vector4 from = Normalized(a);
-    Vector4 to = Normalized(b);
+    Vector4 from = Normal(a);
+    Vector4 to = Normal(b);
 
     float theta = Angle(from, to);
     float sinTheta = sinf(theta);
@@ -784,7 +784,7 @@ inline Vector4 Slerp(const Vector4 &a, const Vector4 &b, const float t)
 
 inline Vector4 NormalLerp(const Vector4 &a, const Vector4 &b, const float t)
 {
-    return Normalized(Lerp(a, b, t));
+    return Normal(Lerp(a, b, t));
 }
 
 inline bool operator == (const Vector4 &a, const Vector4 &b)
@@ -1156,7 +1156,7 @@ inline Matrix4 Inverse(const Matrix4 &a)
         return inverse;
     }
 
-    inverse = Adjugate(m);
+    inverse = Adjugate(a);
     return inverse * (1.0f / det);
 }
 
@@ -1170,8 +1170,8 @@ inline void Invert(Matrix4 &a)
         return;
     }
 
-    Matrix4 adj = Adjugate(m);
-    m = adj * (1.0f / det);
+    Matrix4 adj = Adjugate(a);
+    a = adj * (1.0f / det);
 }
 
 inline Matrix4 Frustum(float left, float right, float top, float bottom, float near, float far)
@@ -1196,7 +1196,7 @@ inline Matrix4 Frustum(float left, float right, float top, float bottom, float n
 
 inline Matrix4 Perspective(float fieldOfView, float aspectRatio, float near, float far)
 {
-    float ymax = near * tanf(fieldOfView * PI / 360f);
+    float ymax = near * tanf(fieldOfView * PI / 360.0f);
     float xmax = ymax * aspectRatio;
 
     return Frustum(-xmax, xmax, -ymax, ymax, near, far);
@@ -1228,14 +1228,14 @@ inline Matrix4 LookAtMatrix(const Vector3 &position, const Vector3 &target, cons
     for (int i = 0; i < 16; ++i)
         l.data[i] = 0;
 
-    Vector3 f = Normalized(target - position) * -1f;
+    Vector3 f = Normal(target - position) * -1.0f;
     Vector3 r = Cross(up, f);
 
     if (r.x == 0 && r.y == 0 && r.z == 0)
         return l;
     
     Normalize(r);
-    Vector3 u = Normalized(Cross(f, r));
+    Vector3 u = Normal(Cross(f, r));
 
     Vector3 t;
     t.x = r * position;
@@ -1278,7 +1278,7 @@ inline float Scalar(const Quaternion &q)
 
 inline Quaternion AngleAxis(const float angle, const Vector3 &axis)
 {
-    Vector3 norm = Normalized(axis);
+    Vector3 norm = Normal(axis);
     float s = sinf(angle * .5f);
 
     Quaternion q;
@@ -1292,8 +1292,8 @@ inline Quaternion AngleAxis(const float angle, const Vector3 &axis)
 
 inline Quaternion VectorTransitionQuat(const Vector3 &from, const Vector3 &to)
 {
-    Vector3 f = Normalized(from);
-    Vector3 t = Normalized(to);
+    Vector3 f = Normal(from);
+    Vector3 t = Normal(to);
 
     Quaternion r;
 
@@ -1320,7 +1320,7 @@ inline Quaternion VectorTransitionQuat(const Vector3 &from, const Vector3 &to)
             ortho.x = ortho.y = 0;
         }
 
-        Vector3 axis = Normalized(Cross(f, ortho));
+        Vector3 axis = Normal(Cross(f, ortho));
         
         r.x = axis.x;
         r.y = axis.y;
@@ -1330,7 +1330,7 @@ inline Quaternion VectorTransitionQuat(const Vector3 &from, const Vector3 &to)
         return r;
     }
 
-    Vector3 half = Normalized(f + t);
+    Vector3 half = Normal(f + t);
     Vector3 axis = Cross(f, half);
 
     r.x = axis.x;
@@ -1366,13 +1366,13 @@ inline Quaternion Inverse(const Quaternion &q)
         inv.data[i] = 0;
 
     float sLen = SquaredLength(q);
-    if (sLen < = EPSILON)
+    if (sLen <= EPSILON)
         return inv;
     
     float reciprocate = 1.0f / sLen;
     for (int i = 0; i < 3; ++i)
-        inv.data[i] = -a.data[i] * reciprocate;
-    inv.w = a.w * reciprocate;
+        inv.data[i] = -q.data[i] * reciprocate;
+    inv.w = q.w * reciprocate;
 
     return inv;
 }
@@ -1409,13 +1409,13 @@ inline Quaternion Mix(const Quaternion &from, const Quaternion &to, const float 
 
 inline Quaternion NormalLerp(const Quaternion &from, const Quaternion &to, const float t)
 {
-    return Normalized(from + (to - from) * t);
+    return Normal(from + (to - from) * t);
 }
 
 inline Quaternion Power(const Quaterion &q, const float t)
 {
     float angle = 2.0f * acosf(Scalar(q));
-    Vector3 axis = Normalized(Vector(q));
+    Vector3 axis = Normal(Vector(q));
 
     float halfCos = cosf(t * angle * .5f);
     float halfSin = sinf(t * angle * .5f);
@@ -1436,7 +1436,7 @@ inline Quaternion Slerp(const Quaternion &start, const Quaternion &end, const fl
         return NormalLerp(start, end, t);
     
     Quaternion delta = Multiply(Inverse(start), end);
-    return Normalized(Multiply(Power(delta, t), start));
+    return Normal(Multiply(Power(delta, t), start));
 }
 
 inline Quaternion Sample(const Quaternion &a, const Quaternion &b)
@@ -1449,8 +1449,8 @@ inline Quaternion Sample(const Quaternion &a, const Quaternion &b)
 
 inline Quaternion LookRotation(const Vector3 &direction, const Vector3 &up)
 {
-    Vector3 f = Normalized(direction);
-    Vector3 u = Normalized(up);
+    Vector3 f = Normal(direction);
+    Vector3 u = Normal(up);
     Vector3 r = Cross(u, f);
     u = Cross(f, r);
 
@@ -1462,7 +1462,7 @@ inline Quaternion LookRotation(const Vector3 &direction, const Vector3 &up)
     Quaternion u2u = VectorTransitionQuat(objUp, u);
 
     Quaternion result = Multiply(worldToObj, u2u);
-    return Normalized(result);
+    return Normal(result);
 }
 
 inline Matrix4 QuaternionToMatrix4(const Quaternion &q)
