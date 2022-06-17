@@ -15,7 +15,25 @@ namespace Horrific::Core
 
         m_Name = sceneJson["name"].get<std::string>();
 
-        
+        json objs = sceneJson["gameObjects"].array();
+
+        for (json obj : objs)
+        {
+            std::string name = obj["name"].get<std::string>();
+
+            json comps = obj["components"].array();
+
+            GameObject *g = new GameObject();
+            g->SetName(name);
+
+            for (json comp : comps)
+            {
+                Component *c = parsers[comp["type"].get<std::string>()]->Parse(comp["data"]);
+                g->AddComponent(c);
+            }
+
+            m_GameObjects.push_back(g);
+        }
     }
 
     void Scene::Start()
