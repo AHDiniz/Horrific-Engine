@@ -8,7 +8,7 @@ CFLAGS = -Wall -Wextra -ggdb -pedantic -lraylib -lGL -lm -lpthread -ldl -lX11 -s
 LIBS = -Lvendor/raylib/lib/linux
 endif
 
-EXE = bin/game
+EXE = bin/horrific
 
 INCLUDE = -Iinclude/ -Ivendor/raylib/include/ -Ivendor/json
 SOURCE = $(wildcard src/*.cpp) $(wildcard src/**/*.cpp) $(wildcard include/*.hpp) $(wildcard include/**/*.hpp)
@@ -17,7 +17,7 @@ game: $(wildcard src/*.cpp) $(wildcard include/*.hpp) $(wildcard src/**/*.cpp) $
 	$(CC) $(LIBS) $(INCLUDE) -o $(EXE) $(SOURCE) $(CFLAGS)
 
 bindirs:
-	mkdir bin/ && mkdir obj/
+	mkdir bin/ && mkdir lib/
 
 run:
 	./$(EXE)
