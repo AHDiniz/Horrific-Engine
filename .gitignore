@@ -2,16 +2,3 @@
 .vscode/
 bin/
 obj/
-
-*.make
-*.sln
-*.vcxproj
-*.vcxproj.filters
-*.vcxproj.user
-Makefile
-
-vendor/glad/*.o
-vendor/glad/*.a
-
-vendor/glfw/*.a
-vendor/glfw/*.dll
