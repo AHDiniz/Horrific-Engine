@@ -14,7 +14,7 @@ namespace Horrific::Core
     public:
 
         Scene(std::string jsonFileName, std::unordered_map<std::string, IComponentParser*> &parsers);
-        ~Scene() = default;
+        ~Scene();
 
         void Start();
         void Update();
@@ -27,13 +27,17 @@ namespace Horrific::Core
         inline std::string Name() { return m_Name; }
         inline void SetName(std::string name) { m_Name = name; }
 
-        void GetGameObjects(const std::vector<std::string> names, std::vector<GameObject*> &gameObjects);
-        void AddGameObjects(std::vector<GameObject *> &gameObjects);
+        inline bool FinalScene() { return m_FinalScene; }
+        inline void SetFinalScene(bool finalScene) { m_FinalScene = finalScene; }
+
+        void AddGameObjects(const std::vector<GameObject *> &gameObjects);
+        void GetPersistentObject(std::vector<GameObject *> &gameObjects);
 
     private:
 
         std::vector<GameObject *> m_GameObjects;
         std::string m_Name;
+        bool m_FinalScene;
     };
 }
 

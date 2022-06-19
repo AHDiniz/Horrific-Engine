@@ -1,25 +1,29 @@
 #include "pch.h"
-#include "glad.h"
-#include "glfw3.h"
-#include "core/memory.h"
-#include "core/app.h"
+#include "core/game.h"
+#include "raylib.h"
+
+using namespace Horrific;
 
 int main(int argc, char *argv[])
 {
-    App app;
+    Core::Game *game = Core::Game::Instance();
 
-    if (!AppInit(&app, 800, 600, "Horrific Engine"))
+    game->Start();
+
+    InitWindow(game->Width(), game->Height(), (game->Name()).c_str());
+
+    while (!WindowShouldClose())
     {
-        return EXIT_FAILURE;
+        game->Update();
+
+        BeginDrawing();
+        {
+            game->Render();
+        }
+        EndDrawing();
     }
 
-    while (!AppShouldClose(&app))
-    {
-        AppUpdate(&app, 1);
-        AppRender(&app, 1);
-    }
-
-    AppFinish(&app);
+    game->Finish();
 
     return EXIT_SUCCESS;
 }

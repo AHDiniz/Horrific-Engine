@@ -1,5 +1,6 @@
 #include "core/game.h"
 #include "core/scene.h"
+#include "raylib.h"
 
 namespace Horrific::Core
 {
@@ -22,6 +23,7 @@ namespace Horrific::Core
 
     void Game::Render()
     {
+        ClearBackground(BLACK);
         m_CurrentScene->Render();
     }
 

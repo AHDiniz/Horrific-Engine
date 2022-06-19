@@ -7,6 +7,7 @@
 namespace Horrific::Core
 {
     class json;
+    class GameObject;
 
     class Component
     {
@@ -22,7 +23,10 @@ namespace Horrific::Core
 
     protected:
 
+        friend class GameObject;
+
         bool m_Enabled;
+        GameObject *m_GameObject;
     };
 
     class IComponentParser
@@ -46,10 +50,17 @@ namespace Horrific::Core
         inline bool Active() { return m_Active; }
         inline void SetActive(bool active) { m_Active = active; }
 
+        inline bool Persistent() { return m_Persistent; }
+        inline void SetPersistent(bool persistent) { m_Persistent = persistent; }
+
         inline std::string Name() { return m_Name; }
         inline void SetName(std::string name) { m_Name = name; }
 
-        inline void AddComponent(Component *c) { m_Components.push_back(c); }
+        inline void AddComponent(Component *c)
+        {
+            c->m_GameObject = this;
+            m_Components.push_back(c);
+        }
 
         inline const std::vector<Component*> &Components() const { return m_Components; }
 
@@ -81,6 +92,7 @@ namespace Horrific::Core
         std::vector<Component*> m_Components;
         std::string m_Name;
         bool m_Active;
+        bool m_Persistent = false;
     };
 }
 
