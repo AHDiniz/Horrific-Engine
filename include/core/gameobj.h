@@ -3,11 +3,12 @@
 #define GAMEOBJ_H_
 
 #include "pch.h"
+#include "json.hpp"
 
 namespace Horrific::Core
 {
-    class json;
     class GameObject;
+    using json = nlohmann::json;
 
     class Component
     {
