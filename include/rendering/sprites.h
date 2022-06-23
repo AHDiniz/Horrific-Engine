@@ -10,6 +10,8 @@ namespace Horrific::Rendering
 {
 	using json = nlohmann::json;
 
+	class Core::Transform2D;
+
     class SpriteSheetRenderer : public Core::Component
     {
     public:
@@ -31,14 +33,19 @@ namespace Horrific::Rendering
 		inline int Height() { return m_Rect.height; }
 		inline void SetHeight(int height) { m_Rect.height = height; }
 
+		inline Color GetColor() { return m_Color; }
+		inline void SetColor(Color color) { m_Color = color; }
+
 	private:
 
 		std::string m_SheetFileName;
 		int m_Width, m_Height;
 		int m_CountX, m_CountY;
 		int m_CurrentSprite;
+		Color m_Color = WHITE;
 		Texture m_Texture;
 		Rectangle m_Rect;
+		Core::Transform2D *m_Transform;
     };
 
 	class SpriteSheetRendererParser : public Core::IComponentParser

@@ -1,4 +1,5 @@
 #include "rendering/sprites.h"
+#include "core/transform2D.h"
 
 namespace Horrific::Rendering
 {
@@ -15,12 +16,24 @@ namespace Horrific::Rendering
 
     void SpriteSheetRenderer::Start()
     {
-    	
+    	m_Transform = m_GameObject->GetComponent<Core::Transform2D>();
     }
 
     void SpriteSheetRenderer::Render()
     {
-	
+        Rectangle source, destination;
+
+        source.x = m_CurrentSprite % m_CountX;
+        source.y = m_CurrentSprite / m_CountX;
+
+        Vector2 pos = m_Transform->Position();
+        destination.x = pos.x;
+        destination.y = pos.y;
+
+        source.width = destination.width = m_Width;
+        source.height = destination.height = m_Height;
+
+        DrawTexturePro(m_Texture, source, destination, pos, m_Transform->Rotation(), m_Color);
     }
 
     void SpriteSheetRenderer::Finish()
