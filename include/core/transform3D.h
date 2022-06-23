@@ -8,6 +8,8 @@
 
 namespace Horrific::Core
 {
+    using json = nlohmann::json;
+
     class Transform3D : public Component
     {
     public:
@@ -36,6 +38,12 @@ namespace Horrific::Core
     private:
 
         Transform m_Transform;
+    };
+
+    class Transform3DParser : public IComponentParser
+    {
+    public:
+        Component *Parse(json &data) override;
     };
 }
 

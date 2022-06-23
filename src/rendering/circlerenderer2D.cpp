@@ -36,4 +36,16 @@ namespace Horrific::Rendering
                 DrawCircle(pos.x, pos.y, m_Radius, m_Color);
         }
     }
+
+    Core::Component *CircleRenderer2D::Parse(json &data)
+    {
+        float radius = data["radius"].get<float>();
+        json colorJSON = data["color"];
+        Color color;
+        color.r = colorJSON["r"].get<int>();
+        color.g = colorJSON["g"].get<int>();
+        color.b = colorJSON["b"].get<int>();
+        color.a = colorJSON["a"].get<int>();
+        return (Core::Component *) new CircleRenderer2D(radius, color);
+    }
 }

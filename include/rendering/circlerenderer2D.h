@@ -12,6 +12,8 @@ namespace Horrific::Core
 
 namespace Horrific::Rendering
 {
+    using json = nlohmann::json;
+
     class CircleRenderer2D : public Core::Component
     {
     public:
@@ -46,6 +48,12 @@ namespace Horrific::Rendering
         Color m_Color;
         Vector2 m_Angles;
         Core::Transform2D *m_Transform;
+    };
+
+    class CircleRenderer2DParser : public Core::IComponentParser
+    {
+    public:
+        Core::Component *Parse(json &data) override;
     };
 }
 

@@ -8,6 +8,8 @@
 
 namespace Horrific::Rendering
 {
+    using json = nlohmann::json;
+
     class RectRenderer2D : public Core::Component
     {
     public:
@@ -42,6 +44,12 @@ namespace Horrific::Rendering
         Vector2 m_Dimensions;
         Color m_Color;
         Core::Transform2D *m_Transform;
+    };
+
+    class RectRenderer2DParser : public Core::IComponentParser
+    {
+    public:
+        Core::Component *Parse(json &data) override;
     };
 }
 

@@ -1,11 +1,16 @@
 #include <stdio.h>
 
-#include "test.h"
+#include "horrific.h"
+#include <unordered_map>
 
-namespace Test
+namespace Horrific::Core
 {
-    void TestGame::Setup()
+    void Game::Setup()
     {
         
+
+        std::unordered_map<std::string, IComponentParser*> parsers;
+        
+        // parsers["Transform2D"] = 
     }
 }

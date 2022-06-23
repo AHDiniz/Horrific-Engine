@@ -4,15 +4,5 @@
 
 #include "horrific.h"
 
-using namespace Horrific;
-
-namespace Test
-{
-    class TestGame : public Core::Game
-    {
-    public:
-    private:
-    };
-}
 
 #endif

@@ -40,4 +40,23 @@ namespace Horrific::Rendering
                 DrawRectangleRec(rect, m_Color);
         }
     }
+
+    Core::Component *RectRenderer2DParser::Parse(json &data)
+    {
+        json dimensions = data["dimensions"];
+        json color = data["color"];
+
+        Vector2 d;
+        Color c;
+
+        d.x = dimensions["x"].get<float>();
+        d.y = dimensions["y"].get<float>();
+
+        c.r = color["r"].get<int>();
+        c.g = color["g"].get<int>();
+        c.b = color["b"].get<int>();
+        c.a = color["a"].get<int>();
+
+        return (Core::Component*) new RectRenderer2D(d, c);
+    }
 }

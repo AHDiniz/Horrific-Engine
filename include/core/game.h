@@ -14,7 +14,7 @@ namespace Horrific::Core
         static Game *Instance();
         ~Game();
 
-        void Setup(std::string setupFile);
+        void Setup();
 
         void Start();
         void Update();
@@ -37,8 +37,10 @@ namespace Horrific::Core
 
         void GoToScene(std::string name);
     
-    private:
+    protected:
         
+        static Game *s_Instance;
+
         Game() = default;
         
         std::vector<Scene*> m_Scenes;

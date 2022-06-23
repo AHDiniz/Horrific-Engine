@@ -8,6 +8,8 @@ int main(int argc, char *argv[])
 {
     Core::Game *game = Core::Game::Instance();
 
+    game->Setup();
+
     game->Start();
 
     InitWindow(game->Width(), game->Height(), (game->Name()).c_str());

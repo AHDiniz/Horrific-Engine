@@ -1,6 +1,6 @@
 CC = g++
 SRC = $(wildcard src/*.cpp) $(wildcard src/**/*.cpp)
-INCLUDES = -Iinclude -I../include
+INCLUDES = -Iinclude/ -I../include/
 LIBS = -l../lib
 CFLAGS = -lhorrific -Wall -Wextra -ggdb
 

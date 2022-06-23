@@ -1,0 +1,24 @@
+{
+    "name": "Test",
+    "gameObjects": [
+        {
+            "name": "Player",
+            "components": [
+                {
+                    "type": "Transform2D",
+                    "data": {
+                        "position": {"x": 640, "y": 360},
+                        "rotation": 0
+                    }
+                },
+                {
+                    "type": "CircleRenderer2D",
+                    "data": {
+                        "radius": 50,
+                        "color": {"r": 200, "g": 20, "b": 20, "a": 255}
+                    }
+                }
+            ]
+        }
+    ]
+}

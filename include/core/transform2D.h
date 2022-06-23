@@ -7,6 +7,8 @@
 
 namespace Horrific::Core
 {
+    using json = nlohmann::json;
+
     class Transform2D : public Component
     {
     public:
@@ -29,6 +31,12 @@ namespace Horrific::Core
 
         Vector2 m_Position;
         float m_Rotation;
+    };
+
+    class Transform2DParser : public IComponentParser
+    {
+    public:
+        Component *Parse(json &data) override;
     };
 }
 
